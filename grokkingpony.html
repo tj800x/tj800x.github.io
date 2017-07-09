@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Groking Pony</title>
+  <meta name="GENERATOR" content="Mmark Markdown Processor v1.3.5">
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="inc/grokkingpony.css">
+<script src="inc/prism.js">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+<script src="inc/orderedlist-minimal.scale.fix.js"></script>
+<script src="inc/jquery.waypoints.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+      $("body").wrapInner("<div class=\"book\"></div>")
+
+      // waypoints for nav, no idea why I need proper js here.
+      $("h1").waypoint(function(e, direction) {
+          // because we insert a para symbol for easy deeplinking, we
+          // should take the string from the second char on.
+          $("#nav-h1").text(this.element.textContent.substring(1));
+          // reset the other one
+          $("#nav-h2").text("");
+      }, {offset: '75%'});
+      $("h2").waypoint(function(e, direction) {
+          $("#nav-h2").text(this.element.textContent.substring(1));
+      }, {offset: '75%'});
+
+      answers();
+      appendices
+      chapters();
+      epigraphs();
+      figures();
+      tables();
+
+      html();
+
+      references();
+
+      links();
+    });
+
+    function chapters(){
+        // This is the only spot where I used knowledge of the doc, i.e.
+        // Preface is the first chapter.
+      $("h1:not(.appendix):not(.preface):not(.title)").each(function(index){
+        $(this).prepend("Chapter " + (index+1) + ". ")
+      })
+    }
+
+    function appendices(){
+     $("h1.appendix").each(function(index){
+        $(this).prepend("Appendix " + String.fromCharCode(65 + index) + ". ")
+      })
+    }
+
+    function tables(){
+      $("table > caption").each(function(index){
+        $(this).prepend("Table " + (index+1) + ". ")
+      })
+    }
+
+    function figures(){
+      $("figure:not(.title) > figcaption").each(function(index){
+        $(this).prepend("Figure " + (index+1) + ". ")
+      })
+    }
+
+    function references(){
+      $("a.cite").each(
+        function(){
+          var xid = $(this).attr("href");
+          var val = $(xid).index() + 1; // 0 based
+          $(this).append("[" + val + "]")
+        }
+      );
+
+      $("a:empty, [href^='#']").each(
+        function(){
+          // Skip class=cite.
+          if ($(this).hasClass("cite")) {
+              return
+          }
+          var xid = $(this).attr("href");
+          // Split out the different things we can reference.
+          if ($(xid).is("table")) {
+              $(this).append("Table " + ($("table").index($(xid)) + 1));
+              return;
+          }
+          if ($(xid).is("figure")) {
+              $(this).append("Figure " + ($("figure").index($(xid)) + 1));
+              return;
+          }
+          var val = $(xid).text();
+          $(this).append(val);
+        }
+      );
+    }
+
+    function epigraphs() {
+      $("blockquote.epigraph footer").prepend("<hr>");
+    }
+
+    // include some html
+    function html() {
+        var fork = $('<div>');
+        fork.load('inc/forkme.html', function(){
+            $(this).insertAfter("body");
+        });
+        var nav = $('<div>');
+        nav.load('inc/nav.html', function(){
+            $(this).insertBefore("h1#preface");
+            // call navtoc as we now have the thing loaded.
+            navtoc();
+        });
+    }
+
+    function navtoc(){
+      $("li#nav-toc-h0").append("<ul class=\"nav-toc-h0\"></ul>");
+
+      // all works, this needs to fix the css to actual make a drop down menu
+      // $("h1").each(function(){
+      //         $("ul.nav-toc-h0").append("<li><a href=\"#" + $(this).attr("id") + "\">" + $(this).text().substring(1)).append("</a></li>");
+      //         var ids = $(this).attr("id")
+      //         $("ul.nav-toc-h0").append("<ul id=\"nav-toc-h1" + ids + "\"></ul>");
+      //          $(this).nextUntil("h1", "h2").each(function() {
+      //           $("#nav-toc-h1" + ids).append("<li><a href=\"#" + $(this).attr("id") + "\">" + $(this).text().substring(1)).append("</a></li>");
+      //         });
+      //  });
+    }
+
+    function links() {
+        return $(":header[id]").each(function(i, el) {
+            var $el, icon, id;
+            $el = $(el);
+            id = $el.attr('id');
+            icon = '<i>&para;</i>';
+            if (id) {
+                return $el.prepend($("<a />").addClass("header-link").attr("href",
+                        window.location.pathname + "#" + id).html(icon));
+            }
+        });
+    }
+
+   function answers() {
+        $("h3:contains('Answer')").addClass("closed")
+
+        $("h3:contains('Answer')").each(function() {
+           $(this).click(function(){ $(this).nextUntil("h1,h2,h3").slideToggle("fast");
+                $(this).toggleClass("open closed");
+           });
+           $(this).nextUntil("h1,h2,h3").slideUp();
+        });
+   }
+</script>
+</head>
+<body>
+<h1 class="preface" id="preface">Preface</h1>
+
+<p>The source for this book is available on GitHub [<a href="https://github.com/tj800x/GrokkingPony">https://github.com/tj800x/GrokkingPony</a>].</p>
+
+<p><em>All example code used in this book is hereby placed in the public domain.</em></p>
+
+<blockquote>
+<p>This work is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International License. To
+view a copy of this license, visit <a href="https://creativecommons.org/licenses/by-sa/4.0/">https://creativecommons.org/licenses/by-sa/4.0/</a>
+or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.</p>
+</blockquote>
+
+<p>The following people made large or small contributions to earlier versions of this book:</p>
+
+<p>Miek Gieben</p>
+
+<p>Tom Johnson<br>
+Massachusetts, USA</p>
+
+<h1 id="groking-pony" class="title">Groking Pony</h1>
+
+<p><figure class="title"><img src="fig/booktitle.png" alt=""></figure></p>
+
+<h1 id="introduction">Introduction</h1>
+
+<blockquote class="epigraph">
+<p>&quot;Grab the broom of anger and drive off the beast of fear.”
+‑‑Zora&nbsp;Neale&nbsp;Hurston</p>
+</blockquote>
+
+<p>The Pony programming language is an open source programming language that allows developers to write fast, safe, efficient, highly concurrent programs that take full advantage of multi-core processor technology.  Beyond speed, Pony provides a quantum shift in program reliability over competing languages.  Reliability is important in many domains, but in certain environments like embedded systems programming, reliability often has to be the developer's top-most concern.</p>
+
+<p>Pony offers reliability improvements in a number of ways:</p>
+
+<h3 id="type-safety">Type Safety</h3>
+
+<p>First, Pony is type safe.  It is a strongly typed language and it is also statically typed.  This means that all variables and other memory references must conform to rigourous constraints imposed on the programmer by the compiler -- at compile time.  To the Pony compiler a number is a number, and if the programmer attempts to peform arithmetic addition with a number and an incompatible type -- say a string -- then the compiler will complain loudly and generate an error.  Contrast this with other programming languages which will allows characters and numbers to be added together in a dynamic fashion with hardly a wimper.  Sometimes bugs like this are not detected at all until a once-in-a-lifetime event occurs...then the program crashes.  Such thoughts are the nightmare material of embedded programmers everywhere.</p>
+
+<h3 id="memory-safety">Memory Safety</h3>
+
+<p>Second, Pony is memory safe.  Memory is maniplated thorugh high-level constructs in Pony.  Pony does not allow the use of pointers.<sup>1</sup>  This means that common problems such as dangling pointers, improperly pointed pointers, and buffer overruns are almost never a concern within Pony code.  Pony does not even have the concept of null.<sup>2</sup>  Since these types of software flaws are exactly the kind of attack vectors that hackers seek to exploit, Pony provides a large increase in the level of software security.</p>
+
+<h3 id="exception-safety">Exception Safety</h3>
+
+<p>Pony is exception safe.  Pony understands where exceptions can possibly occur and requires the programmer to handle these exception conditions.  For example, when performing a file operation, Pony requires the programmer to plan for the possibility that the file does not exist.  The compiler is comprehensive, requiring exception handling in many circumstances where programmers have typically thought, &quot;Well, that will never happen.&quot;  If an exception is possible, Pony will require the programmer to code for it.</p>
+
+<h3 id="concurrency-safety">Concurrency Safety</h3>
+
+<p>Pony is designed to be data race free, even when running on multi-core processors.  Pony doesn't have locks or atomic operations.  This allows the Pony programmer to write highly concurrent software without running into the many problems that plaque software development efforts on other language platforms.</p>
+
+<p>Pony accomplishes this concurrency &quot;magic&quot; by uniquely using six different memory access mechanisms to make sure that memory-reads can never conflict with memory-writes, and vice-versa.  Pony's memory access mechanisms are far beyond what other programming languages offer.</p>
+
+<h3 id="deadlocks">Deadlocks</h3>
+
+<p>In concurrent computing, a deadlock occurs when multiple software threads wait for one or more threads to release a lock.  This is a common problem and one which elaborate efforts are made to avoid.  Pony, because it does not have locks, does not suffer from potential deadlock conditions.</p>
+
+<h2 id="other-improvements">Other Improvements</h2>
+
+<p>Beyond reliability improvements, Pony offers a number of unique features that are not typically found in competitive languages.</p>
+
+<p>Pony is a ahead-of-time compiler that generates &quot;native code&quot;.  It does not require any sort of interpreter or virtual machine.  In fact, there are no technologic limitations preventing Pony compiled programs from running on &quot;bare&quot; systems, that is systems without operating systems.  Also, because Pony compiles to a small executable size and is efficient with memory, Pony programs can be run on many devices with limited processing power.</p>
+
+<p>Pony offers compatibility with C for those instances where the programmer requires the use of external libraries.  In fact, Pony internally uses data structures much in the way that C typically does.  This means that it is very easy to use C libraries with Pony programs and also to use Pony libraries within C programs or the many other languages that allow the use of C libraries.</p>
+
+<p>As can be seen in the above list, Pony provides a multitude of improvements over existing software devlopment languages.  The most important of these improvements is Pony's central focus on writing highly concurrent programs without requiring the programmer to manage locking critical resources like shared memory.</p>
+
+<h2 id="memory">Memory</h2>
+
+<p>Traditional programming languages that run on multi-core processors rely on locking mechanisms because whenever two independent threads access the same shared mutable memory there is a danger that update-timing and/or read-timing might conflict, resulting in one or both threads having invalid data.  Locks only allow reading of data when no updating is occurring, and to only allow writing of data when no reads are occuring.  While they can be made to work, locks are not without drawbacks in terms of performance and the level of system complexity required in order for them to be safely used.</p>
+
+<p>Pony's solution is different.  Pony structures the programming language and memory access patterns in such a way as to allow the compiler to detect and enforce these two basic rules at compile time:</p>
+
+<h3 id="the-two-basic-rules-of-concurrent-memory-access">The Two Basic Rules of Concurrent Memory Access</h3>
+
+<ol>
+<li>When writing to shared memory, no other thread must be allowed to read or write.</li>
+<li>Only read from shared memory when no other thread can possibly write to that memory.</li>
+</ol>
+
+<p>Much of the challenge in learning Pony is in understanding the mechanisms Pony provides to allow threads to share data without locking.  In this book I hope to help you grok, that is understand at a deep and intuitive level, how Pony accomplishes this feat will your producivity in this amazing new language take off.</p>
+
+<h2 id="six-memory-access-mechanisms">Six Memory Access Mechanisms</h2>
+
+<p>Pony allows programmers to adhere to these two rules through the use of six different mechanisms to access memory.  Those mechanisms are immutable memory access, isolated memory access,  reference memory access, immutable memory access, opaque memory location &quot;fixing&quot;, boxed memory access, and transitional memory access</p>
+
+<h1 id="analogy">Analogy</h1>
+
+<blockquote class="epigraph">
+<p>&quot;All perception of truth is the detection of an analogy.&quot; ‑‑Henry&nbsp;David&nbsp;Thoreau</p>
+</blockquote>
+
+<h2 id="a-hightech-dancing-analogy">A High-Tech Dancing Analogy</h2>
+
+<p>Since Pony's way of managing shared memory is so new and unique it is often hard to imagine how this might work, especially at compile-time. An analogy to a fictional 21st Century dance activity may prove enlightening:</p>
+
+<blockquote>
+<p>Boston, May 1st, 2025</p>
+
+<p>Pony<sup>2</sup> Dancing is a form of organized dance that is all the rage with kids these days.  It's a wonderous experience involving multiple
+individual dancers, and/or groups of dance partners, where the dancers
+move and interact in complex ways.  For a naive observer, the sight of
+dozens of people moving in syncronization on a multi-colored dance floor can be
+stupefying.  The &quot;trick&quot; being that each of the individual dancers are
+actually progressing through a series of per-learned dance manuevers, and
+all of this is coordinated by a an artificial intelligence dance leader, who, in a throwback to older days, is known as the &quot;Caller.&quot;</p>
+</blockquote>
+
+<p>In our analogy, Pony actors are the dancers and the Pony compiler is the Caller synchronizing the dance moves.  Just as dance involves coordinated manuevers of physical space, Pony allows actors to make coordinated manuevers of memory space and in doing so ensures that the Two Basic Rules of Concurrent Memory Access are met.</p>
+
+<p>Instead of learning dance moves like &quot;promenade&quot; and &quot;allmande left&quot;, Pony programmers must learn six basic memory &quot;manuevers&quot; to fully utilize the capabilities of the system.  We call these moves the Six Memory Access Mechanisms and following them ensure that potential conflicts in memory space are avoided.  Failing to follow these moves results in Pony programs that the compiler refuses to compile.</p>
+
+<p>With some careful extending of the dance metaphor, it's possible to gain a bit more insight into Pony's inner workings.</p>
+
+<ul>
+<li>Memory can be thought of as a dance floor made of large tiles, where each tile can be individually lighted in various colors.</li>
+<li>Memory addresses are like the physical X-Y coordinates specifying the fix (coordinates) of a tile.</li>
+<li>An Actor is a single dancing &quot;unit&quot;; either a single dancer or multiple dance partners who perform certain moves together.</li>
+<li>Memory state can be thought of as the color of a given tile on our digitally-enhanced floor.</li>
+<li>Writing to memory is like when a dancer manipulates a tile at their feet.  This is colloqually known in the Pony Dancing community as the electric slide.</li>
+<li>Reading memory occurs when a dancer (actor) examines a tile and notes the color.</li>
+</ul>
+
+<p>From the perspective of an Actor (dancer):</p>
+
+<ul>
+<li>An Alias is like that of a relation between a single dancer and a specific tile on the dance floor.</li>
+<li>A Local Alias is another relation to the same tile, where the dancer is in partnership with the first.</li>
+<li>A Global Alias is another relation to the same tile, where the dancer is not in partnership with the first.</li>
+</ul>
+
+<p>Furthermore:</p>
+
+<ul>
+<li>Threads are a sequence of instructions, like a dance routine, that can be performed in parallel.  Just as a dance routine is limited to dance partners, a thread is limited to a single actor and it's local aliases.</li>
+</ul>
+
+<p>Given the above, we can analogize to the following dancing/memory manuevers:</p>
+
+<ul>
+<li><p>Immutable Memory Read (VAL) Move:  The &quot;VAL&quot; move is when a dancer views and takes note of the color of a particular tile on the floor.  If the view to the tile is clear, then multiple dancers (actors) can use the VAL move to examine the tile without potential conflicts (Rule 2).  Likewise, while a dancer is viewing the color of a particular tile with a VAL move, no dancer is allowed to change the color by means of any other move (Rule 1).</p></li>
+
+<li><p>Isolated Memory Access (ISO) Move: The &quot;ISO&quot; move can be thought of as stepping onto a particular tile and completely obscuring the view for all other dancers (actors) and even other dance partners (local aliases).  Perhaps a cloak is involved.  Once an ISO move is initiated, that dancer is free to examine and mutate the tile-state (color.)  Only one dancer may perform the ISO move at a time on a given tile and once the dancer starts the ISO move, they control the tile (Rule 1).  Should another dancer (actor) be viewing the tile (memory), as in when they are performing an VAL move, the ISO movement is prevented from being carried out (Rule 2).  In the real Pony programming world this is a compiler error.</p></li>
+
+<li><p>Reverence Memory Access (REF) Move:  The REF move is similar to the ISO move, but can be performed in conjuction with a dance partner (local alias).  The partners surround the tile (&quot;memory&quot;) and completely obscure it from view by all other dancers (actors) that are operating on different threads.  Each of the dancers (local aliases) performing the move may then freely update, or take note of (Rule 1). Since access to the tile by other dancers is precluded, the dancer peforming this move can also safely read the tile state (Rule 2).</p></li>
+
+<li><p>Opaque Memory Fixing (TAG) Move:  The TAG move is different from all others in that a dancer (actor) performing the move soley is making note of the location of a particular memory tile.  Neither examining nor changing the tile is part of this movement (Rules 1 and 2) , and so it does not prevent any other moves with relation to this memory tile.  The TAG move is useful in that it gathers information that can be freely passed on to other actors in the system.</p></li>
+
+<li><p>The Transitive Write (TRN) Move:  The TRN move only applies to Dancers with partners (Actors with Local Aliases).  In this two-step move the dancer and dance-partner first join cloaks to obscure a memory-tile from other actors.  Next the dancer (actor) changes the memory-tile with the electric-slide foot movement and the partners (Local aliase) observe the tile-state.  Since the cloaks obscure the view of other dancers (other actors), a TRN prevents other threads from reading or writing the memory while it is being mutated (Rule 1).  Second, Only local actors (running on the same thread) are allowed to observe the memory state while it is being mutated (Rule 2).</p></li>
+
+<li><p>The Guarenteed Read (BOX) Move:  The BOX move is a type of double-move that the actor uses on top of other moves to soley ensures that the Actor can read a memory-tile state.  First, the actor must be able to see the tile; this precludes using the BOX move on tiles that are already subject to an ISO, TRN or REF move by some other Actor (Rule 1).  Second, once the BOX move is initiated, the move involves partially obscuring the tile, with the result being that no other actor can perform any move could mutates the tile (Rule 2).</p></li>
+</ul>
+
+<p>Additionally, there are two major multiple dancer moves:</p>
+
+<ul>
+<li><p>The CONSUME Move: The Consume Manuever is similar to a mimicking move, where one dancer (actor) begins mimicking a move of another.  Once synchronized, the original dancer discontinues the movement and gives up original capabilities to the new dancer (actor2) who gains those same capabililities.  ISO Moves can always be consumed by another, as the exclusive nature of the allowed memory access is transferrable.</p></li>
+
+<li><p>The RECOVER Dance within a dance:  The Recover move can be thought of as a little bit of a dance within a dance.  This dance takes one or more existing dance moves and changes it into another type.</p></li>
+</ul>
+
+<!---
+Can we consume val, ref, trn, box, ref and tag?
+-->
+
+<h1 id="basics">Basics</h1>
+
+<h3 id="hello-farm">Hello Farm</h3>
+
+<p>Enjoy this new take on an old classic:</p>
+
+<pre><code>actor Main <span class="callout">1</span>
+  new create(environment:Env) =&gt;  <span class="callout">2</span>
+  environment.out.print(&quot;Hello, Farm!&quot;)  <span class="callout">3</span>
+</code></pre>
+
+<p><span class="callout">1</span> The topmost programming unit in Pony is an actor.  The <code>Main</code> is a specially named actor in that it is the actor that runs when the program is executed.</p>
+
+<p><span class="callout">2</span> This actor has a creator function, which is executed any time the actor is created.  Here the program is set to accept the operating system environment as a parameter to the creator function.  The operating system passes the environment to the creator in an object of type <code>Env</code> and is received in the <code>Main</code> actor and assigned a variable named <code>environment</code> in this instance.  The <code>Env</code> object includes the standard input stream, the standard output stream, the standard error stream, plus the environmental variables.</p>
+
+<p><span class="callout">3</span> The program runs the <code>print</code> function on the <code>environment.out</code> object.  Here we are passing the string,<code>&quot;Hello, Farm!&quot;</code>.The print function outputs this text to the console using the standard output stream.</p>
+
+</body>
+</html>
